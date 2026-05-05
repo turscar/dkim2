@@ -1,0 +1,187 @@
+package main
+
+import (
+	"bytes"
+	"crypto"
+	"crypto/ed25519"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"fmt"
+	"io"
+	"log"
+	"net/mail"
+	"os"
+	"regexp"
+
+	flag "github.com/spf13/pflag"
+
+	"go.turscar.ie/dkim2"
+)
+
+func main() {
+	var in, out, domain, selector, nonce, mailFrom, keyfile string
+	var rcptTo []string
+	var exploded, donotexplode, donotmodify, feedback, fixup bool
+	var timestamp int64
+
+	now := dkim2.Now()
+
+	flag.StringVar(&in, "in", "-", "input file")
+	flag.StringVar(&out, "out", "-", "output file")
+	flag.StringVar(&domain, "domain", "", "domain")
+	flag.StringVar(&selector, "selector", "", "selector")
+	flag.StringVar(&keyfile, "key", "", "file containing private key")
+	flag.StringVar(&mailFrom, "from", "", "mail from")
+	flag.StringSliceVar(&rcptTo, "to", []string{}, "rcpt to")
+	flag.StringVar(&nonce, "nonce", "", "nonce")
+	flag.Int64Var(&timestamp, "timestamp", now, "signing timestamp (epoch seconds)")
+	flag.BoolVar(&donotexplode, "donottexplode", false, "set donottexplode flag")
+	flag.BoolVar(&donotmodify, "donotmodify", false, "set donotmodify flag")
+	flag.BoolVar(&exploded, "exploded", false, "set exploded flag")
+	flag.BoolVar(&feedback, "feedback", false, "set feedback flag")
+	flag.BoolVar(&fixup, "fixup", true, "fix line endings on input")
+	flag.Parse()
+
+	var inFile io.Reader
+	var outFile io.Writer
+	switch in {
+	case "-", "":
+		inFile = os.Stdin
+	default:
+		inF, err := os.Open(in)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer func(inF *os.File) {
+			_ = inF.Close()
+		}(inF)
+		inFile = inF
+	}
+
+	input, err := io.ReadAll(inFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if fixup {
+		input = regexp.MustCompile(`\r?\n`).ReplaceAll(input, []byte("\r\n"))
+	}
+
+	privateKey, err := loadPrivateKey(keyfile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rawHeaders, message, err := dkim2.ReadMessage(bytes.NewReader(input))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Copy the body, as we need to read it twice
+	body, err := io.ReadAll(message.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if mailFrom == "" {
+		froms, err := mail.ParseAddressList(message.Header.Get("From"))
+		if err != nil {
+			log.Printf("Failed to parse mail from address: %s\n", err)
+		} else if len(froms) > 0 {
+			mailFrom = froms[0].Address
+		}
+	}
+
+	if len(rcptTo) == 0 {
+		tos, err := mail.ParseAddressList(message.Header.Get("To"))
+		if err != nil {
+			log.Printf("Failed to parse mail from address: %s\n", err)
+		} else if len(tos) > 0 {
+			for _, to := range tos {
+				rcptTo = append(rcptTo, to.Address)
+			}
+		}
+	}
+
+	options := dkim2.SignOptions{
+		Nonce:     nonce,
+		Timestamp: timestamp,
+		Domain:    domain,
+		Keys: []dkim2.SigningKey{
+			{
+				Selector: selector,
+				Signer:   privateKey,
+			},
+		},
+		Exploded:     exploded,
+		DoNotExplode: donotexplode,
+		DoNotModify:  donotmodify,
+		Feedback:     feedback,
+		ExtraFlags:   nil,
+		Signature:    nil,
+	}
+
+	extraHeaders, err := dkim2.SignMessage(&mail.Message{
+		Header: message.Header,
+		Body:   bytes.NewReader(body),
+	}, mailFrom, rcptTo, nil, options)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	switch out {
+	case "-", "":
+		outFile = os.Stdout
+	default:
+		outF, err := os.Create(out)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer func(outF *os.File) {
+			_ = outF.Close()
+		}(outF)
+		outFile = outF
+	}
+
+	for _, extraHeader := range extraHeaders {
+		_, err = io.WriteString(outFile, extraHeader)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	_, err = outFile.Write(rawHeaders)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = outFile.Write([]byte("\r\n"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = outFile.Write(body)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func loadPrivateKey(filename string) (crypto.Signer, error) {
+	keyfile, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	pemBlock, _ := pem.Decode(keyfile)
+	if pemBlock != nil && pemBlock.Type == "PRIVATE KEY" {
+		key, err := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
+		if err != nil {
+			return nil, err
+		}
+
+		switch key := key.(type) {
+		case *rsa.PrivateKey:
+			return key, nil
+		case ed25519.PrivateKey:
+			return key, nil
+		}
+	}
+
+	return nil, fmt.Errorf("failed to parse private key")
+}
