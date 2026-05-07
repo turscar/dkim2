@@ -55,6 +55,11 @@ notarize:
 
 pkgs:
   - name: 'dist2{{ if ne .Arch "all" }}-{{.Arch}}{{ end }}'
+    id: dkim2
+    ids:
+      - dkim2verify
+      - dkim2explain
+      - dkim2sign
     use: binary
     identifier: ie.turscar.dist2
     install_location: /usr/local/bin
