@@ -70,10 +70,10 @@ func HashHeaders(hash io.Writer, headers map[string][]string) {
 	for _, key := range slices.Sorted(maps.Keys(headers)) {
 		lines := headers[key]
 		for _, line := range slices.Backward(lines) {
-			hash.Write([]byte(key))
-			hash.Write([]byte(":"))
-			hash.Write([]byte(line))
-			hash.Write([]byte("\r\n"))
+			_, _ = hash.Write([]byte(key))
+			_, _ = hash.Write([]byte(":"))
+			_, _ = hash.Write([]byte(line))
+			_, _ = hash.Write([]byte("\r\n"))
 		}
 	}
 }

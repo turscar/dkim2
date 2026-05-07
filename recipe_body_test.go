@@ -41,7 +41,7 @@ func TestBodyRecipe(t *testing.T) {
 			//fmt.Printf("newBody=%q\n", string(newBody))
 			//fmt.Printf("oldBody=%q\n", string(oldBody))
 
-			if diff := jsonDiff(wantRecipe, string(gotRecipe)); diff != "" {
+			if diff := jsonDiff(wantRecipe, gotRecipe); diff != "" {
 				t.Errorf("body recipe mismatch (-want +got):\n%s", diff)
 			}
 

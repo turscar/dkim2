@@ -47,7 +47,7 @@ func TestHeaderDiff(t *testing.T) {
 			}
 			//t.Log(gotRecipe)
 
-			if diff := jsonDiff(wantRecipe, string(gotRecipe)); diff != "" {
+			if diff := jsonDiff(wantRecipe, gotRecipe); diff != "" {
 				t.Errorf("header recipe mismatch (-want +got):\n%s", diff)
 			}
 

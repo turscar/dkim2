@@ -32,3 +32,7 @@ go.work.sum
 # .vscode/
 /cmd/dkim2sign/dkim2sign
 /.idea
+/cmd/dkim2explain/dkim2explain
+/cmd/dkim2verify/dkim2verify
+# Added by goreleaser init:
+dist/

@@ -19,11 +19,14 @@ import (
 	"go.turscar.ie/dkim2"
 )
 
+var version, commit, date, builtBy string
+
 func main() {
 	var in, out, domain, selector, nonce, mailFrom, keyfile string
 	var rcptTo []string
 	var exploded, donotexplode, donotmodify, feedback, fixup bool
 	var timestamp int64
+	var printVersion bool
 
 	now := dkim2.Now()
 
@@ -41,7 +44,24 @@ func main() {
 	flag.BoolVar(&exploded, "exploded", false, "set exploded flag")
 	flag.BoolVar(&feedback, "feedback", false, "set feedback flag")
 	flag.BoolVar(&fixup, "fixup", true, "fix line endings on input")
+	flag.BoolVar(&printVersion, "version", false, "print version")
+
 	flag.Parse()
+
+	if printVersion {
+		fmt.Printf("Version: %s\nCommit: %s\nDate: %s\nBuiltBy: %s\nSpec: %s\n", version, commit, date, builtBy, dkim2.Spec)
+		os.Exit(0)
+	}
+
+	if keyfile == "" {
+		log.Fatalf("--key flag is required")
+	}
+	if domain == "" {
+		log.Fatalf("--domain flag is required")
+	}
+	if selector == "" {
+		log.Fatalf("--selector flag is required")
+	}
 
 	var inFile io.Reader
 	var outFile io.Writer
@@ -72,15 +92,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	rawHeaders, message, err := dkim2.ReadMessage(bytes.NewReader(input))
+	fmt.Println(input)
+	message, err := mail.ReadMessage(bytes.NewReader(input))
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Copy the body, as we need to read it twice
-	body, err := io.ReadAll(message.Body)
-	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("error parsing input message: %w", err))
 	}
 
 	if mailFrom == "" {
@@ -121,14 +136,6 @@ func main() {
 		Signature:    nil,
 	}
 
-	extraHeaders, err := dkim2.SignMessage(&mail.Message{
-		Header: message.Header,
-		Body:   bytes.NewReader(body),
-	}, mailFrom, rcptTo, nil, options)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	switch out {
 	case "-", "":
 		outFile = os.Stdout
@@ -143,21 +150,8 @@ func main() {
 		outFile = outF
 	}
 
-	for _, extraHeader := range extraHeaders {
-		_, err = io.WriteString(outFile, extraHeader)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	_, err = outFile.Write(rawHeaders)
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = outFile.Write([]byte("\r\n"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = outFile.Write(body)
+	err = dkim2.Sign(outFile, bytes.NewReader(input), options)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -166,13 +160,13 @@ func main() {
 func loadPrivateKey(filename string) (crypto.Signer, error) {
 	keyfile, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read keyfile: %w", err)
 	}
 	pemBlock, _ := pem.Decode(keyfile)
 	if pemBlock != nil && pemBlock.Type == "PRIVATE KEY" {
 		key, err := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to parse private key: %w", err)
 		}
 
 		switch key := key.(type) {

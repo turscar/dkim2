@@ -69,6 +69,9 @@ func NewDnsResolver(nameserver string) (*DnsResolver, error) {
 			nameserver = nameserver + ":" + conf.Port
 		}
 	}
+	if !strings.Contains(nameserver, ":") {
+		nameserver = nameserver + ":53"
+	}
 	return &DnsResolver{
 		Client:     new(dns.Client),
 		Nameserver: nameserver,

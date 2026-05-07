@@ -1,20 +1,33 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
 
 	flag "github.com/spf13/pflag"
+	"go.turscar.ie/dkim2"
 )
+
+var version, commit, date, builtBy string
 
 func main() {
 	targetM := 0
 	var in, out string
+	var printVersion bool
+
 	flag.IntVar(&targetM, "targetM", 0, "targetM")
 	flag.StringVar(&in, "in", "-", "input")
 	flag.StringVar(&out, "out", "-", "output")
+	flag.BoolVar(&printVersion, "version", false, "print version")
+
 	flag.Parse()
+
+	if printVersion {
+		fmt.Printf("Version: %s\nCommit: %s\nDate: %s\nBuiltBy: %s\nSpec: %s\n", version, commit, date, builtBy, dkim2.Spec)
+		os.Exit(0)
+	}
 
 	var inF io.Reader
 	switch in {
@@ -51,4 +64,5 @@ func main() {
 		}(f)
 		outF = f
 	}
+	_, _ = inF, outF
 }

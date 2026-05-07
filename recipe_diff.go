@@ -68,7 +68,7 @@ func diffBody(oldBody, newBody io.Reader) *RecipeBodySteps {
 	return &steps
 }
 
-func diffHeaders(ctx context.Context, oldHeader, newHeader map[string][]string) *RecipeHeaderMap {
+func diffHeaders(_ context.Context, oldHeader, newHeader map[string][]string) *RecipeHeaderMap {
 	if headersEqual(oldHeader, newHeader) {
 		return nil
 	}

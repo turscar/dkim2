@@ -303,18 +303,18 @@ func ParseSignature(h string) (*Signature, error) {
 	return &ret, nil
 }
 
-func (s *Signature) Flags() []string {
-	flags := s.ExtraFlags
-	if s.DoNotExplode {
+func (d *Signature) Flags() []string {
+	flags := d.ExtraFlags
+	if d.DoNotExplode {
 		flags = append(flags, "donotexplode")
 	}
-	if s.DoNotModify {
+	if d.DoNotModify {
 		flags = append(flags, "donotmodify")
 	}
-	if s.Feedback {
+	if d.Feedback {
 		flags = append(flags, "feedback")
 	}
-	if s.Exploded {
+	if d.Exploded {
 		flags = append(flags, "exploded")
 	}
 	return flags
@@ -498,15 +498,6 @@ func (d *Signature) ToString() string {
 		_, _ = fmt.Fprintf(&b, ";\r\n f=%s", strings.Join(allFlags, ","))
 	}
 	return b.String()
-}
-
-func isAsciiString(s []byte) bool {
-	for _, c := range s {
-		if c > unicode.MaxASCII {
-			return false
-		}
-	}
-	return true
 }
 
 func isPrintString(s []byte) bool {

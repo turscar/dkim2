@@ -20,8 +20,6 @@ type MessageInstance struct {
 	Original string
 }
 
-var base64Regexp = regexp.MustCompile(`^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$`)
-
 // ParseMessageInstance parses the contents of a Message-Instance header
 func ParseMessageInstance(s string) (*MessageInstance, error) {
 	tags, err := NewTags(hdrMessageInstance, s, "m")
