@@ -39,6 +39,10 @@ builds:
 notarize:
   macos:
     - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
+      ids:
+        - dkim2verify
+        - dkim2explain
+        - dkim2sign
       sign:
         certificate: "{{.Env.MACOS_SIGN_P12}}"
         password: "{{.Env.MACOS_SIGN_PASSWORD}}"
