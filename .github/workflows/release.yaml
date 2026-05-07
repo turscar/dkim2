@@ -28,14 +28,14 @@ jobs:
       # The ID of the '.p8' key.
       # You can find it in the filename, as well as the Apple Developer Portal
       # website.
-      MACOS_NOTARY_KEY_ID: ${{ env.TURSCAR_NOTARY_KEY_ID }}
+      MACOS_NOTARY_KEY_ID: ${{ vars.TURSCAR_NOTARY_KEY_ID }}
 
       # The issuer UUID.
       # You can find it in the Apple Developer Portal website.
-      MACOS_NOTARY_ISSUER_ID: ${{ env.TURSCAR_NOTARY_ISSUER_ID }}
+      MACOS_NOTARY_ISSUER_ID: ${{ vars.TURSCAR_NOTARY_ISSUER_ID }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Install Go
