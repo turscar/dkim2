@@ -10,6 +10,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/pkg/diff v0.0.0-20241224192749-4e6772a4315c
 	github.com/spf13/pflag v1.0.10
+	go.turscar.ie/theme v0.0.1
 )
 
 require (
@@ -26,7 +27,6 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	go.turscar.ie/theme v0.0.1 // indirect
 	golang.org/x/crypto v0.48.0 // indirect
 	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
