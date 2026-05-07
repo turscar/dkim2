@@ -15,13 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # The base64 of the contents of your '.p12' key.
-      MACOS_SIGN_P12: ${{ secrets.TURSCAR_INSTALLER_P12 }}
+      MACOS_SIGN_P12: ${{ secrets.TURSCAR_APP_P12 }}
 
       # The password to open the '.p12' key.
-      MACOS_SIGN_PASSWORD: ${{ secrets.TURSCAR_INSTALLER_PASSWORD }}
+      MACOS_SIGN_PASSWORD: ${{ secrets.TURSCAR_APP_PWD }}
 
       # The base64 of the contents of your '.p8' key.
-      MACOS_NOTARY_KEY: ${{ secrets.TURSCAR_INSTALLER_NOTARY_KEY }}
+      MACOS_NOTARY_KEY: ${{ secrets.TURSCAR_NOTARY_KEY }}
 
       # The ID of the '.p8' key.
       # You can find it in the filename, as well as the Apple Developer Portal
@@ -51,4 +51,5 @@ jobs:
         with:
           distribution: goreleaser-pro
           version: "~> v2"
-          args: release --clean
+          args: release --clean --verbose
+
