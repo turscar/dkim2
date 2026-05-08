@@ -27,7 +27,7 @@ builds:
   - main: ./cmd/...
     env:
       - CGO_ENABLED=0
-    ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.CommitDate}} -X main.builtBy=goreleaser'
+    ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.CommitDate}} -X main.builtBy=goreleaser
     goos:
       - linux
       - windows
@@ -43,6 +43,7 @@ pkgs:
       - dkim2verify
       - dkim2explain
       - dkim2sign
+      - dkim2history
     use: binary
     identifier: ie.turscar.dist2
     install_location: /usr/local/bin
@@ -65,6 +66,7 @@ notarize:
         - dkim2verify
         - dkim2explain
         - dkim2sign
+        - dkim2history
       sign:
         certificate: "{{.Env.MACOS_SIGN_APP_P12}}"
         password: "{{.Env.MACOS_SIGN_APP_PASSWORD}}"

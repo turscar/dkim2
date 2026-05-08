@@ -54,7 +54,7 @@ func main() {
 
 	headerName := lipgloss.NewStyle().Inline(true).Foreground(theme.Blue)
 	headerValue := lipgloss.NewStyle().Foreground(theme.White)
-	errorColor := lipgloss.NewStyle().Foreground(theme.Red)
+	errorColor := lipgloss.NewStyle().Inline(true).Foreground(theme.Red)
 	msg, err := mail.ReadMessage(inFile)
 	if err != nil {
 		_, _ = lipgloss.Printf("%s\n", errorColor.Render(err.Error()))

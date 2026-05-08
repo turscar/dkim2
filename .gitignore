@@ -36,3 +36,4 @@ go.work.sum
 /cmd/dkim2verify/dkim2verify
 # Added by goreleaser init:
 dist/
+/cmd/dkim2history/dkim2history
