@@ -19,6 +19,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       flags: ""
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+      KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      MACOS_NOTARY_PROFILE_NAME: ${{ secrets.MACOS_NOTARY_PROFILE_NAME }}
+      # The base64 of the contents of your '.p12' key.
+      MACOS_SIGN_P12: ${{ secrets.TURSCAR_INSTALLER_P12 }}
+      # The password to open the '.p12' key.
+      MACOS_SIGN_PASSWORD: ${{ secrets.TURSCAR_INSTALLER_PWD }}
+
+      # The base64 of the contents of your '.p8' key.
+      MACOS_NOTARY_KEY: ${{ secrets.TURSCAR_NOTARY_KEY }}
+
+      # The ID of the '.p8' key.
+      # You can find it in the filename, as well as the Apple Developer Portal
+      # website.
+      MACOS_NOTARY_KEY_ID: ${{ vars.TURSCAR_NOTARY_KEY_ID }}
+
+      # The issuer UUID.
+      # You can find it in the Apple Developer Portal website.
+      MACOS_NOTARY_ISSUER_ID: ${{ vars.TURSCAR_NOTARY_ISSUER_ID }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -54,6 +74,7 @@ jobs:
         name: Prepare for signing
         shell: bash
         run: |
+          set -u
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/goreleaser.p12
           KEY_PATH=$RUNNER_TEMP/goreleaser.p8
@@ -67,7 +88,6 @@ jobs:
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          echo "$MACOS_SIGN_P12"
           md5sum $CERTIFICATE_PATH
           # import certificate to keychain
           echo foo
@@ -86,32 +106,12 @@ jobs:
 
           # export the keychain path
           echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >>$GITHUB_ENV
+
       - uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8 # v7.2.1
         with:
           distribution: goreleaser-pro
           version: "~> v2"
           args: release --clean --split ${{ env.flags }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-          MACOS_NOTARY_PROFILE_NAME: ${{ secrets.MACOS_NOTARY_PROFILE_NAME }}
-          # The base64 of the contents of your '.p12' key.
-          MACOS_SIGN_P12: ${{ secrets.TURSCAR_INSTALLER_P12 }}
-          # The password to open the '.p12' key.
-          MACOS_SIGN_PASSWORD: ${{ secrets.TURSCAR_INSTALLER_PWD }}
-
-          # The base64 of the contents of your '.p8' key.
-          MACOS_NOTARY_KEY: ${{ secrets.TURSCAR_NOTARY_KEY }}
-
-          # The ID of the '.p8' key.
-          # You can find it in the filename, as well as the Apple Developer Portal
-          # website.
-          MACOS_NOTARY_KEY_ID: ${{ vars.TURSCAR_NOTARY_KEY_ID }}
-
-          # The issuer UUID.
-          # You can find it in the Apple Developer Portal website.
-          MACOS_NOTARY_ISSUER_ID: ${{ vars.TURSCAR_NOTARY_ISSUER_ID }}
   release:
     runs-on: ubuntu-latest
     needs: prepare
