@@ -67,6 +67,7 @@ jobs:
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          echo "$MACOS_SIGN_P12"
           md5sum $CERTIFICATE_PATH
           # import certificate to keychain
           echo foo
