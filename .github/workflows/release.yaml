@@ -27,6 +27,9 @@ jobs:
       MACOS_SIGN_P12: ${{ secrets.TURSCAR_INSTALLER_P12 }}
       # The password to open the '.p12' key.
       MACOS_SIGN_PASSWORD: ${{ secrets.TURSCAR_INSTALLER_PWD }}
+      MACOS_SIGN_APP_P12: ${{ secrets.TURSCAR_APP_P12 }}
+      # The password to open the '.p12' key.
+      MACOS_SIGN_APP_PASSWORD: ${{ secrets.TURSCAR_APP_PWD }}
 
       # The base64 of the contents of your '.p8' key.
       MACOS_NOTARY_KEY: ${{ secrets.TURSCAR_NOTARY_KEY }}

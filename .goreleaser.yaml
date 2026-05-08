@@ -36,38 +36,6 @@ builds:
       - arm64
       - amd64
 
-notarize:
-  macos_native:
-    - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
-      ids:
-        - dkim2verify
-        - dkim2explain
-        - dkim2sign
-        - dkim2
-        - ie.turscar.dist2
-      use: pkg
-      sign:
-        keychain: "{{ .Env.KEYCHAIN_PATH }}"
-        identity: "Developer ID Installer: Turscar LTD"
-      notarize:
-        profile_name: "{{ .Env.MACOS_NOTARY_PROFILE_NAME }}"
-        wait: true
-#  macos:
-#    - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
-#      ids:
-#        - dkim2verify
-#        - dkim2explain
-#        - dkim2sign
-#      sign:
-#        certificate: "{{.Env.MACOS_SIGN_P12}}"
-#        password: "{{.Env.MACOS_SIGN_PASSWORD}}"
-#      notarize:
-#        issuer_id: "{{.Env.MACOS_NOTARY_ISSUER_ID}}"
-#        key_id: "{{.Env.MACOS_NOTARY_KEY_ID}}"
-#        key: "{{.Env.MACOS_NOTARY_KEY}}"
-#        wait: true
-#        timeout: 20m
-
 pkgs:
   - name: 'dkim2{{ if ne .Arch "all" }}-{{.Arch}}{{ end }}'
     id: dkim2
@@ -80,6 +48,33 @@ pkgs:
     install_location: /usr/local/bin
     replace: true
     mod_timestamp: "{{ .CommitTimestamp }}"
+
+notarize:
+  macos_native:
+    - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
+      use: pkg
+      sign:
+        keychain: "{{ .Env.KEYCHAIN_PATH }}"
+        identity: "Developer ID Installer: Turscar LTD"
+      notarize:
+        profile_name: "{{ .Env.MACOS_NOTARY_PROFILE_NAME }}"
+        wait: true
+  macos:
+    - enabled: '{{ isEnvSet "MACOS_SIGN_APP_P12" }}'
+      ids:
+        - dkim2verify
+        - dkim2explain
+        - dkim2sign
+      sign:
+        certificate: "{{.Env.MACOS_SIGN_APP_P12}}"
+        password: "{{.Env.MACOS_SIGN_APP_PASSWORD}}"
+      notarize:
+        issuer_id: "{{.Env.MACOS_NOTARY_ISSUER_ID}}"
+        key_id: "{{.Env.MACOS_NOTARY_KEY_ID}}"
+        key: "{{.Env.MACOS_NOTARY_KEY}}"
+        wait: true
+        timeout: 20m
+
 
 archives:
   - formats: [tar.gz]
