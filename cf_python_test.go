@@ -74,7 +74,7 @@ func TestPython_VerifyAll(t *testing.T) {
 			defer func(f *os.File) {
 				_ = f.Close()
 			}(f)
-			result := VerifyAll(context.Background(), f,
+			result, err := VerifyAll(context.Background(), f,
 				VerifyOptions{
 					IgnoreTimestamp: true,
 					Resolver:        NewTestResolver(),

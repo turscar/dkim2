@@ -153,7 +153,7 @@ func TestRoundTrip(t *testing.T) {
 				t.Errorf("Verify() returned wrong state: %s", result.Err)
 				t.Logf("Signed mail:\n---\n%s\n---", output.String())
 			}
-			resultAll := VerifyAll(context.Background(),
+			resultAll, _ := VerifyAll(context.Background(),
 				bytes.NewReader(output.Bytes()), verifyOpts)
 			if resultAll.State() != StatePass {
 				t.Errorf("VerifyAll() returned wrong state: %s", resultAll.Err)

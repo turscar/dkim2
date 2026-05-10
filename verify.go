@@ -125,12 +125,18 @@ func (v *VerificationResult) setError(err error) {
 	if err == nil {
 		return
 	}
+	v.Err = asVerifyError(err)
+}
+
+func asVerifyError(err error) ErrVerify {
+	if err == nil {
+		return ErrInternal{}
+	}
 	e, ok := err.(ErrVerify)
 	if ok {
-		v.Err = e
-		return
+		return e
 	}
-	v.Err = ErrInternal{
+	return ErrInternal{
 		Err: err,
 	}
 }
@@ -201,31 +207,72 @@ func Verify(ctx context.Context, r io.Reader, opts VerifyOptions) *VerificationR
 	return result
 }
 
+// Result holds the verification results for all the Dkim2-Signatures
+// in a message. If they all PASS then State() and AuthenticationResults
+// return a PASS. If not, they return the state of the first failing
+// signature.
+type Result struct {
+	Signatures []*VerificationResult
+	Exploded   bool
+	Feedback   bool
+	Flags      map[string]struct{}
+	Err        ErrVerify
+}
+
+// State returns a PASS result if all Dk
+func (r Result) State() VerificationState {
+	if r.Err == nil {
+		return StatePass
+	}
+	return r.Err.State()
+}
+
+func (r Result) AuthenticationResult() string {
+	if r.Err == nil {
+		return "; dkim2=pass"
+	}
+	for _, sig := range r.Signatures {
+		if sig.Err != nil {
+			return sig.AuthenticationResult()
+		}
+	}
+	return "; dkim2=pass"
+}
+
 // VerifyAll verifies all DKIM2 signatures of a message.
-func VerifyAll(ctx context.Context, r io.Reader, opts VerifyOptions) *VerificationResult {
+func VerifyAll(ctx context.Context, r io.Reader, opts VerifyOptions) (Result, error) {
 	err := opts.validate()
 	if err != nil {
-		return newResult(err)
+		return Result{
+			Err: asVerifyError(err),
+		}, err
 	}
 
 	msg, err := mail.ReadMessage(r)
 	if err != nil {
-		return newResult(err)
+		return Result{
+			Err: asVerifyError(err),
+		}, err
 	}
 	// Parse all the DKIM2-Signature headers
 	d2headers, miHeaders, err := parseD2Headers(msg.Header)
 	if err != nil {
-		return newResult(err)
+		return Result{
+			Err: asVerifyError(err),
+		}, err
 	}
 
 	body, err := io.ReadAll(msg.Body)
 	if err != nil {
-		return newResult(err)
+		return Result{
+			Err: asVerifyError(err),
+		}, err
 	}
 	headers := NormalizedHeaders(msg.Header)
-	result := newResult(nil)
-
-	// TODO(steve): Check mailfrom / rcptto chains
+	result := Result{
+		Signatures: make([]*VerificationResult, 0, len(d2headers)),
+		Flags:      make(map[string]struct{}),
+	}
 
 	// For each signature
 	for len(d2headers) > 0 {
@@ -236,9 +283,13 @@ func VerifyAll(ctx context.Context, r io.Reader, opts VerifyOptions) *Verificati
 			Header: headers,
 			Body:   bytes.NewReader(body),
 		}, "", nil, d2headers, miHeaders, opts)
+		result.Signatures = append(result.Signatures, res)
 		if err != nil {
 			res.setError(err)
-			return res
+			if result.Err == nil {
+				result.Err = res.Err
+			}
+			continue
 		}
 		if res.Exploded {
 			result.Exploded = true
@@ -260,13 +311,19 @@ func VerifyAll(ctx context.Context, r io.Reader, opts VerifyOptions) *Verificati
 				headers, err = recipe.Header(headers)
 				if err != nil {
 					res.setError(err)
-					return res
+					if result.Err == nil {
+						result.Err = res.Err
+					}
+					continue
 				}
 				var buff bytes.Buffer
 				err = recipe.Body(bytes.NewReader(body), &buff)
 				if err != nil {
 					res.setError(err)
-					return res
+					if result.Err == nil {
+						result.Err = res.Err
+					}
+					continue
 				}
 				body = buff.Bytes()
 			}
@@ -275,7 +332,7 @@ func VerifyAll(ctx context.Context, r io.Reader, opts VerifyOptions) *Verificati
 		d2headers = d2headers[:len(d2headers)-1]
 	}
 
-	return result
+	return result, nil
 }
 
 // parseD2Headers parses the Messsage-Instance and

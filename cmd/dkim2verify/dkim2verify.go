@@ -68,7 +68,7 @@ func main() {
 		RcptTo:          rcptTo,
 	}
 
-	result := dkim2.VerifyAll(context.Background(), inFile, verifyOpts)
+	result, _ := dkim2.VerifyAll(context.Background(), inFile, verifyOpts)
 	fmt.Printf("Authentication result: %s\n", result.AuthenticationResult())
 	if result.Err != nil {
 		fmt.Printf("Error: %s\n", errors.Unwrap(result.Err))
