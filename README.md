@@ -21,8 +21,6 @@ Pre-built binaries are available at [github releases](https://github.com/turscar
 Download and unpack the appropriate .zip or .tar.gz file for
 your OS and architecture.
 
-The macOS .pkg files are not signed, and probably shouldn't be used.
-
 The Windows binaries are not signed.
 
 ## Status
@@ -31,7 +29,7 @@ The library seems to generate and parse messages correctly.
 
 ## Missing
 
-Validation of MAIL FROM / RCPT TO chains.
-
-Results of message-instance recipes that return a "we
-can't reconstruct this" result.
+Message-instance recipes that return a "we
+can't reconstruct this" result aren't returned to the
+caller in any useful way. I'm waiting to see how the
+requirements change there before firming up the API.

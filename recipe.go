@@ -140,9 +140,8 @@ func (s RecipeTruncatedBodyStep) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (s RecipeTruncatedBodyStep) ApplyBody(_ *BodyReader, w io.Writer) error {
-	//TODO implement me
-	panic("implement me")
+func (s RecipeTruncatedBodyStep) ApplyBody(_ *BodyReader, _ io.Writer) error {
+	return nil
 }
 
 type RecipeHeaderStep interface {

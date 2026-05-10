@@ -126,7 +126,7 @@ func SignMessage(message *mail.Message,
 			case ed25519.PublicKey:
 				name = "ed25519-sha256"
 			default:
-				panic(fmt.Errorf("unsupported signing algorithm: %T", key))
+				return nil, fmt.Errorf("unsupported signing algorithm: %T", key)
 			}
 			sigs = append(sigs,
 				Sig{
