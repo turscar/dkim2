@@ -307,6 +307,7 @@ func VerifyAll(ctx context.Context, r io.Reader, opts VerifyOptions) (Result, er
 		for len(miHeaders) > 0 &&
 			miHeaders[len(miHeaders)-1].Revision >= m {
 			recipe := miHeaders[len(miHeaders)-1].Recipes
+			miHeaders = miHeaders[:len(miHeaders)-1]
 			if recipe != nil {
 				headers, err = recipe.Header(headers)
 				if err != nil {
@@ -327,7 +328,6 @@ func VerifyAll(ctx context.Context, r io.Reader, opts VerifyOptions) (Result, er
 				}
 				body = buff.Bytes()
 			}
-			miHeaders = miHeaders[:len(miHeaders)-1]
 		}
 
 	}
