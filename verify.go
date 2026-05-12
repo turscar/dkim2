@@ -171,14 +171,6 @@ var DefaultResolver = func() KeyResolver {
 	return r
 }()
 
-//XXXX do chain-walking VerifyAll, generating lists
-//of all D2, MI headers and applying the recipes as we
-//walk back D2, removing sigs and associated MI as we
-//go. Have a struct that contains the header lists,
-//a mail.Header and body, and a function that steps
-//that back to a given point. Use that for dkim2undo,
-//and VerifyAll.
-
 // Verify verifies the newest DKIM2 signature of a message,
 // as required at email receipt time to allow rejection
 // if needed.
@@ -274,23 +266,31 @@ func VerifyAll(ctx context.Context, r io.Reader, opts VerifyOptions) (Result, er
 		Flags:      make(map[string]struct{}),
 	}
 
+	mailFrom := opts.MailFrom
+	rcptTo := opts.RcptTo
 	// For each signature
 	for len(d2headers) > 0 {
 		lastD2 := d2headers[len(d2headers)-1]
+
 		// Verify the signature for the state of the
 		// message at the time it was assigned
 		res, err := verifyMessage(ctx, &mail.Message{
 			Header: headers,
 			Body:   bytes.NewReader(body),
-		}, "", nil, d2headers, miHeaders, opts)
-		result.Signatures = append(result.Signatures, res)
+		}, mailFrom, rcptTo, d2headers, miHeaders, opts)
+
+		d2headers = d2headers[:len(d2headers)-1]
+		mailFrom = ""
+		rcptTo = nil
 		if err != nil {
 			res.setError(err)
 			if result.Err == nil {
 				result.Err = res.Err
 			}
+			result.Signatures = append(result.Signatures, res)
 			continue
 		}
+		result.Signatures = append(result.Signatures, res)
 		if res.Exploded {
 			result.Exploded = true
 		}
@@ -329,7 +329,7 @@ func VerifyAll(ctx context.Context, r io.Reader, opts VerifyOptions) (Result, er
 			}
 			miHeaders = miHeaders[:len(miHeaders)-1]
 		}
-		d2headers = d2headers[:len(d2headers)-1]
+
 	}
 
 	return result, nil
