@@ -1,8 +1,8 @@
 Message-Instance: m=1; h=sha256:SLtzk6LO68CCaX4edrJ6yfpWbp3hwgvI8IdMBRLDk+Y=:SgG5fNGEg1x24MwItCUYGDHQkWKng06W1/IvTGBdwzU=
 Dkim2-Signature: i=1; m=1; t=1740000000; d=test1.dkim2.com;
  mf=PD4=;
- rt=cmVjaXBpZW50QGV4YW1wbGUuY29t;
- s=ed25519:ed25519-sha256:Zpg03v4sOGi5LkC4jW16aM2ZimtGgXUR5DU05KB40kITItzNnj34WZIoHuuKRu/MfTIg8uawrSfe7hhPEoyCAw==
+ rt=PHJlY2lwaWVudEBleGFtcGxlLmNvbT4=;
+ s=ed25519:ed25519-sha256:xP0XGnTjsi6gZzHjEKHrH9sUf50FgmzZjtR4CkwFXYHg7r+RI8TjUoL3+Ud0Jiosph7kG94+WtvjBBOqryUbAg==
 From: sender@test1.dkim2.com
 To: recipient@example.com
 Subject: Simple test message

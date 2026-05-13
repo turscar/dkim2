@@ -481,7 +481,7 @@ func verifyMessage(ctx context.Context, msg *mail.Message,
 		// domain, either exactly or as a subdomain of it.
 		if mailFrom != "<>" {
 			at := strings.LastIndex(mailFrom, "@")
-			mailFromDomain := "." + strings.ToLower(mailFrom[at+1:])
+			mailFromDomain := "." + strings.ToLower(mailFrom[at+1:len(mailFrom)-1]) // Trim trailing ">" too
 			signingDomain := "." + strings.ToLower(lastD2.Domain)
 			if !strings.HasSuffix(mailFromDomain, signingDomain) {
 				return result, ErrMailFromAndDoNotMatch{}

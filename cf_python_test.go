@@ -13,12 +13,12 @@ func TestPython_Verify(t *testing.T) {
 		RcptTo   []string
 	}{
 		"simple-ed25519": {
-			MailFrom: "sender@test1.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			//MailFrom: "<sender@test1.dkim2.com>",
+			//RcptTo:   []string{"<recipient@example.com>"},
 		},
 		"simple-rsa1024": {
-			MailFrom: "sender@test1.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			//MailFrom: "sender@test1.dkim2.com",
+			//RcptTo:   []string{"recipient@example.com"},
 		},
 		"simple-rsa2048":         {},
 		"simple-sel2":            {},

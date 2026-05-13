@@ -25,8 +25,8 @@ func TestRoundTrip(t *testing.T) {
 			Selector: "ed25519",
 			Domain:   "test1.dkim2.com",
 			Key:      "ed25519._domainkey.test1.dkim2.com.pem",
-			MailFrom: "sender@test1.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			MailFrom: "<sender@test1.dkim2.com>",
+			RcptTo:   []string{"<recipient@example.com>"},
 		},
 		// Test 2: Simple message with RSA-1024
 		"simple-rsa1024": {
@@ -34,8 +34,8 @@ func TestRoundTrip(t *testing.T) {
 			Selector: "rsa1024",
 			Domain:   "test1.dkim2.com",
 			Key:      "rsa1024._domainkey.test1.dkim2.com.pem",
-			MailFrom: "sender@test1.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			MailFrom: "<sender@test1.dkim2.com>",
+			RcptTo:   []string{"<recipient@example.com>"},
 		},
 		// Test 3: Simple message with RSA-2048 (sel1)
 		"simple-rsa2048": {
@@ -43,8 +43,8 @@ func TestRoundTrip(t *testing.T) {
 			Selector: "sel1",
 			Domain:   "test1.dkim2.com",
 			Key:      "sel1._domainkey.test1.dkim2.com.pem",
-			MailFrom: "sender@test1.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			MailFrom: "<sender@test1.dkim2.com>",
+			RcptTo:   []string{"<recipient@example.com>"},
 		},
 		// Test 4: Multi-header message with continuation lines, X- header excluded
 		"multiheader-ed25519": {
@@ -52,8 +52,8 @@ func TestRoundTrip(t *testing.T) {
 			Selector: "ed25519",
 			Domain:   "test2.dkim2.com",
 			Key:      "ed25519._domainkey.test2.dkim2.com.pem",
-			MailFrom: "sender@test2.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			MailFrom: "<sender@test2.dkim2.com>",
+			RcptTo:   []string{"<recipient@example.com>"},
 		},
 		// Test 5: Message with trailing blank lines (body canonicalization)
 		"trailingblank-ed25519": {
@@ -61,8 +61,8 @@ func TestRoundTrip(t *testing.T) {
 			Selector: "ed25519",
 			Domain:   "test3.dkim2.com",
 			Key:      "ed25519._domainkey.test3.dkim2.com.pem",
-			MailFrom: "sender@test3.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			MailFrom: "<sender@test3.dkim2.com>",
+			RcptTo:   []string{"<recipient@example.com>"},
 		},
 		// Test 6: Empty body message
 		"emptybody-ed25519": {
@@ -70,8 +70,8 @@ func TestRoundTrip(t *testing.T) {
 			Selector: "ed25519",
 			Domain:   "test4.dkim2.com",
 			Key:      "ed25519._domainkey.test4.dkim2.com.pem",
-			MailFrom: "sender@test4.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			MailFrom: "<sender@test4.dkim2.com>",
+			RcptTo:   []string{"<recipient@example.com>"},
 		},
 		// Test 7: Multiple recipients
 		"multirecipient-ed25519": {
@@ -79,8 +79,8 @@ func TestRoundTrip(t *testing.T) {
 			Selector: "ed25519",
 			Domain:   "test5.dkim2.com",
 			Key:      "ed25519._domainkey.test5.dkim2.com.pem",
-			MailFrom: "sender@test5.dkim2.com",
-			RcptTo:   []string{"alice@example.com", "bob@example.com", "charlie@example.com"},
+			MailFrom: "<sender@test5.dkim2.com>",
+			RcptTo:   []string{"<alice@example.com>", "<bob@example.com>", "<charlie@example.com>"},
 		},
 		// Test 8: DSN (empty MAIL FROM)
 		"dsn-ed25519": {
@@ -89,7 +89,7 @@ func TestRoundTrip(t *testing.T) {
 			Domain:   "test1.dkim2.com",
 			Key:      "ed25519._domainkey.test1.dkim2.com.pem",
 			MailFrom: "<>",
-			RcptTo:   []string{"recipient@example.com"},
+			RcptTo:   []string{"<recipient@example.com>"},
 		},
 		// Test 9: Different selectors on same domain (sel2)
 		"simple-sel2": {
@@ -97,8 +97,8 @@ func TestRoundTrip(t *testing.T) {
 			Selector: "sel2",
 			Domain:   "test1.dkim2.com",
 			Key:      "sel2._domainkey.test1.dkim2.com.pem",
-			MailFrom: "sender@test1.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			MailFrom: "<sender@test1.dkim2.com>",
+			RcptTo:   []string{"<recipient@example.com>"},
 		},
 		// Test 10: Different selectors on same domain (sel3)
 		"simple-sel3": {
@@ -106,8 +106,8 @@ func TestRoundTrip(t *testing.T) {
 			Selector: "sel3",
 			Domain:   "test1.dkim2.com",
 			Key:      "sel3._domainkey.test1.dkim2.com.pem",
-			MailFrom: "sender@test1.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			MailFrom: "<sender@test1.dkim2.com>",
+			RcptTo:   []string{"<recipient@example.com>"},
 		},
 		// Test 11: Duplicate headers (bottom-up ordering)
 		"simple-sel4": {
@@ -115,8 +115,8 @@ func TestRoundTrip(t *testing.T) {
 			Selector: "ed25519",
 			Domain:   "test1.dkim2.com",
 			Key:      "ed25519._domainkey.test1.dkim2.com.pem",
-			MailFrom: "sender@test1.dkim2.com",
-			RcptTo:   []string{"recipient@example.com"},
+			MailFrom: "<sender@test1.dkim2.com>",
+			RcptTo:   []string{"<recipient@example.com>"},
 		},
 	}
 
