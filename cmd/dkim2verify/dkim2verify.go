@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	flag "github.com/spf13/pflag"
 	"go.turscar.ie/dkim2"
@@ -61,10 +62,15 @@ func main() {
 		}
 	}
 
+	recipients := make([]string, len(rcptTo))
+	for i, rcpt := range rcptTo {
+		recipients[i] = wrapAddress(rcpt)
+	}
+
 	verifyOpts := dkim2.VerifyOptions{
 		IgnoreTimestamp: ignoreTimestamp,
 		Resolver:        resolver,
-		MailFrom:        mailFrom,
+		MailFrom:        wrapAddress(mailFrom),
 		RcptTo:          rcptTo,
 	}
 
@@ -84,3 +90,13 @@ func (s StaticResolver) Resolve(_ context.Context, _ string, _ string) ([]string
 }
 
 var _ dkim2.KeyResolver = StaticResolver{}
+
+func wrapAddress(addr string) string {
+	if !strings.HasPrefix(addr, "<") {
+		addr = "<" + addr
+	}
+	if !strings.HasSuffix(addr, ">") {
+		addr = addr + ">"
+	}
+	return addr
+}

@@ -13,6 +13,7 @@ import (
 	"net/mail"
 	"os"
 	"regexp"
+	"strings"
 
 	flag "github.com/spf13/pflag"
 
@@ -118,6 +119,10 @@ func main() {
 		}
 	}
 
+	recipients := make([]string, 0, len(rcptTo))
+	for i, rcpt := range rcptTo {
+		recipients[i] = wrapAddress(rcpt)
+	}
 	options := dkim2.SignOptions{
 		Nonce:     nonce,
 		Timestamp: timestamp,
@@ -134,6 +139,8 @@ func main() {
 		Feedback:     feedback,
 		ExtraFlags:   nil,
 		Signature:    nil,
+		MailFrom:     wrapAddress(mailFrom),
+		RcptTo:       recipients,
 	}
 
 	switch out {
@@ -178,4 +185,14 @@ func loadPrivateKey(filename string) (crypto.Signer, error) {
 	}
 
 	return nil, fmt.Errorf("failed to parse private key")
+}
+
+func wrapAddress(addr string) string {
+	if !strings.HasPrefix(addr, "<") {
+		addr = "<" + addr
+	}
+	if !strings.HasSuffix(addr, ">") {
+		addr = addr + ">"
+	}
+	return addr
 }
