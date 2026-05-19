@@ -305,7 +305,7 @@ func VerifyAll(ctx context.Context, r io.Reader, opts VerifyOptions) (Result, er
 		// headers
 		m := lastD2.MIRevision
 		for len(miHeaders) > 0 &&
-			miHeaders[len(miHeaders)-1].Revision >= m {
+			miHeaders[len(miHeaders)-1].Revision > m {
 			recipe := miHeaders[len(miHeaders)-1].Recipes
 			miHeaders = miHeaders[:len(miHeaders)-1]
 			if recipe != nil {
@@ -527,6 +527,7 @@ func verifyMessage(ctx context.Context, msg *mail.Message,
 	buff.WriteString("\r\n")
 	signedHeaders := buff.Bytes()
 
+	//fmt.Printf("\ni=%d\n---\n%s\n---\n", lastD2.Sequence, string(signedHeaders))
 	// Check signatures
 	sigErrors := make([]error, len(lastD2.Signatures))
 	errCount := 0
