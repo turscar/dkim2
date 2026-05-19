@@ -32,6 +32,10 @@ func TestPython_Verify(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
+			switch name {
+			case "dupheaders-ed25519":
+				t.Skip("Skipping spec-01 test with Authentication-Results header")
+			}
 			f, err := os.Open(filepath.Join("testdata", "interop", "python", "expected", name+".eml"))
 			if err != nil {
 				t.Fatalf("Failed to open file: %v", err)
@@ -67,6 +71,10 @@ func TestPython_VerifyAll(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
+			switch name {
+			case "multihop-dup-headers", "multihop-3hop-dup-headers":
+				t.Skip("Skipping spec-01 test with Authentication-Results header")
+			}
 			f, err := os.Open(filepath.Join("testdata", "interop", "python", "expected", name+".eml"))
 			if err != nil {
 				t.Fatalf("Failed to open file: %v", err)

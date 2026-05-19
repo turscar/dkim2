@@ -37,3 +37,4 @@ go.work.sum
 # Added by goreleaser init:
 dist/
 /cmd/dkim2history/dkim2history
+/internal/generate/chaos/chaos

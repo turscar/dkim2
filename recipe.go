@@ -132,18 +132,6 @@ func (s RecipeDataBodyStep) ApplyBody(_ *BodyReader, w io.Writer) error {
 	return nil
 }
 
-type RecipeTruncatedBodyStep struct{}
-
-func (s RecipeTruncatedBodyStep) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]bool{
-		"z": true,
-	})
-}
-
-func (s RecipeTruncatedBodyStep) ApplyBody(_ *BodyReader, _ io.Writer) error {
-	return nil
-}
-
 type RecipeHeaderStep interface {
 	ApplyHeader(oldHeaders []string, newHeaders []string) ([]string, error)
 }
@@ -254,14 +242,7 @@ func (r *RecipeBodySteps) UnmarshalJSON(data []byte) error {
 				prevEnd = s[1]
 				*r = append(*r, s)
 			case "z":
-				var b bool
-				if err := json.Unmarshal(v, &b); err != nil {
-					return fmt.Errorf("invalid recipe json: %w", err)
-				}
-				if !b {
-					return fmt.Errorf("recipe step z is not true: %v", v)
-				}
-				*r = append(*r, RecipeTruncatedBodyStep{})
+				return fmt.Errorf("invalid recipe step key, removed in draft dkim2-spec-02: %q", k)
 			default:
 				return fmt.Errorf("invalid recipe step key: %q", k)
 			}

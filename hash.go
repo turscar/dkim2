@@ -64,6 +64,8 @@ func HashMessage(body io.Reader, header map[string][]string, hashNames ...string
 	}}, nil
 }
 
+//const saveHeaderHash = true
+
 // HashHeaders hashes the headers of an email, after they have
 // been normalized by NormalizedHeaders
 func HashHeaders(hash io.Writer, headers map[string][]string) {
@@ -76,6 +78,22 @@ func HashHeaders(hash io.Writer, headers map[string][]string) {
 			_, _ = hash.Write([]byte("\r\n"))
 		}
 	}
+	//if saveHeaderHash {
+	//	f, err := os.Create("/tmp/headers_for_hash.txt")
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	defer f.Close()
+	//	for _, key := range slices.Sorted(maps.Keys(headers)) {
+	//		lines := headers[key]
+	//		for _, line := range slices.Backward(lines) {
+	//			_, _ = f.Write([]byte(key))
+	//			_, _ = f.Write([]byte(":"))
+	//			_, _ = f.Write([]byte(line))
+	//			_, _ = f.Write([]byte("\r\n"))
+	//		}
+	//	}
+	//}
 }
 
 // HashBody hashes the content of the body, with line-endings
@@ -112,7 +130,7 @@ func NormalizedHeaders(headers mail.Header) map[string][]string {
 	for k, v := range headers {
 		k = strings.ToLower(k)
 		switch k {
-		case "received", "return-path", "message-instance", "dkim2-signature", "dkim-signature":
+		case "received", "return-path", "message-instance", "dkim2-signature", "dkim-signature", "authentication-results":
 			continue
 		}
 		if strings.HasPrefix(k, "x-") || strings.HasPrefix(k, "arc-") {
